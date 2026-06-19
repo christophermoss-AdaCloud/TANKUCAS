@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ada Vanguard: The UCAS Battlefield</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font for superior readability -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #121813;
+            color: #e2e8f0;
+        }
+        .retro-font {
+            font-family: 'Share Tech Mono', monospace;
+        }
+        /* Custom scrollbar for tactical panels */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a221b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4a5d4e;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #607d65;
+        }
+        /* Pulse animations for tactical guidance */
+        @keyframes radar-pulse {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 0.4; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+        .radar-light {
+            animation: radar-pulse 2s infinite;
+        }
+        /* Gentle focus effects */
+        .glow-green {
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.3);
+        }
+        .glow-amber {
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden select-none">
+
+    <!-- Top HUD Bar -->
+    <header class="bg-[#1b251d] border-b-4 border-[#3b4d3f] px-4 py-3 shadow-lg flex justify-between items-center z-10">
+        <div class="flex items-center space-x-3">
+            <!-- Pulsing Radar Indicator -->
+            <div class="relative w-4 h-4 flex items-center justify-center">
+                <span class="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 radar-light"></span>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
+            </div>
+            <div>
+                <h1 class="text-lg md:text-xl font-bold tracking-wider text-emerald-400 retro-font">ADA TACTICAL HUB: COHORT 10</h1>
+                <p class="text-xs text-stone-400 hidden sm:block">LSA Command Vehicle: Supporting Your Digital Tech Journey</p>
+            </div>
+        </div>
+
+        <!-- Mini Progress Dashboard -->
+        <div class="flex items-center space-x-6">
+            <div class="hidden md:flex flex-col items-end">
+                <span class="text-xs text-stone-400">MISSION COMPLETED</span>
+                <div class="w-32 bg-[#2d3a30] h-3 rounded-full mt-1 overflow-hidden border border-emerald-900">
+                    <div id="hud-progress-bar" class="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full transition-all duration-500" style="width: 5%;"></div>
+                </div>
+            </div>
+            <div class="bg-[#243026] px-3 py-1.5 rounded border border-[#445849] flex items-center space-x-2">
+                <span class="text-amber-400 font-bold retro-font text-sm" id="hud-score">0 XP</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Tactical Workspace -->
+    <main class="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 p-4">
+        
+        <!-- LEFT COLUMN: LSA Advisor Panel & Tank Inventory (Adaptive & highly readable) -->
+        <section class="lg:col-span-4 bg-[#172018] rounded-xl border border-[#2e3e31] p-4 flex flex-col justify-between shadow-2xl relative">
+            
+            <!-- Commander Avatar & Speech Box -->
+            <div>
+                <div class="flex items-center space-x-3 border-b border-[#2d3e30] pb-3 mb-3">
+                    <div class="w-16 h-16 rounded-lg bg-[#243326] border-2 border-emerald-500 flex items-center justify-center p-1 shadow-md shrink-0">
+                        <!-- Custom SVG Tank Crew/LSA Commander Icon -->
+                        <svg class="w-full h-full text-emerald-400" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="16" y="8" width="32" height="12" rx="4" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="32" cy="30" r="14" fill="currentColor" fill-opacity="0.1" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 54C12 44 20.9543 38 32 38C43.0457 38 52 44 52 54" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <line x1="28" y1="14" x2="36" y2="14" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-bold text-stone-200">LSA Tactical Assistant</h2>
+                        <span class="inline-block bg-emerald-950 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-800 tracking-wider">ACTIVE LINK</span>
+                        <p class="text-xs text-stone-400 mt-1">"You've got the smarts for digital skills. Let's conquer UCAS!"</p>
+                    </div>
+                </div>
+
+                <!-- Text to Speech & Assistive Controls -->
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-xs font-semibold text-emerald-500">TACTICAL INSTRUCTIONS</span>
+                    <button onclick="speakCurrentInstruction()" class="bg-[#243326] hover:bg-emerald-900 border border-[#445849] text-xs text-stone-300 hover:text-white px-2 py-1 rounded transition flex items-center space-x-1" title="Read content aloud">
+                        <span>🔊 Read Aloud</span>
+                    </button>
+                </div>
+
+                <!-- Guidance Speech Balloon -->
+                <div class="bg-[#1e2a20] border-l-4 border-emerald-500 p-3.5 rounded-r-lg shadow-inner min-h-[120px] transition-all">
+                    <p id="lsa-speech" class="text-sm leading-relaxed text-stone-100">
+                        Welcome to the UCAS Preparation Campaign! As your LSA here at Ada, I am by your side. We will guide our tank crew through the digital application process, link up with Ada College using our official buzzword, configure tuition calculations, and map out your path to high-earning tech careers. Let's configure your tank and prepare to move out!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Tank Hull & Modular Status Upgrades -->
+            <div class="mt-6">
+                <h3 class="text-xs font-bold text-stone-400 tracking-wider mb-2 retro-font">ADA VANGUARD SYSTEM PROFILE</h3>
+                <div class="bg-[#111912] p-3 rounded-lg border border-[#253328] space-y-3">
+                    
+                    <!-- Interactive Tank Profile Sketch SVG -->
+                    <div class="w-full h-32 flex items-center justify-center bg-[#0d140e] rounded relative overflow-hidden">
+                        <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#10b981 1px, transparent 1px); background-size: 8px 8px;"></div>
+                        
+                        <!-- Modular SVG Tank showing active additions -->
+                        <svg class="w-40 h-24 text-emerald-500 transition-all duration-300" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Turret barrel / Cannon -->
+                            <line id="tank-barrel" x1="50" y1="20" x2="90" y2="20" stroke="currentColor" stroke-width="4" stroke-linecap="round" class="text-stone-600 transition-all"/>
+                            <!-- Turret body -->
+                            <path id="tank-turret" d="M30 25C30 18 38 14 50 14C62 14 70 18 70 25H30Z" fill="currentColor" fill-opacity="0.1" stroke="currentColor" stroke-width="2"/>
+                            <!-- Hull (Core Chassis) -->
+                            <rect id="tank-hull" x="20" y="25" width="60" height="15" rx="3" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="2"/>
+                            <!-- Treads/Wheels -->
+                            <rect x="15" y="39" width="70" height="10" rx="5" fill="currentColor" fill-opacity="0.3" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="23" cy="44" r="4" fill="currentColor"/>
+                            <circle cx="37" cy="44" r="4" fill="currentColor"/>
+                            <circle cx="50" cy="44" r="4" fill="currentColor"/>
+                            <circle cx="63" cy="44" r="4" fill="currentColor"/>
+                            <circle cx="77" cy="44" r="4" fill="currentColor"/>
+                        </svg>
+
+                        <!-- Live Indicators overlay -->
+                        <span id="chassis-badge" class="absolute bottom-2 left-2 text-[10px] px-1.5 py-0.5 rounded bg-emerald-950 border border-emerald-800 font-mono text-emerald-400">Hull: Standard</span>
+                        <span id="weapon-badge" class="absolute top-2 right-2 text-[10px] px-1.5 py-0.5 rounded bg-stone-900 border border-stone-800 font-mono text-stone-400">Aim: Offline</span>
+                    </div>
+
+                    <!-- Modular Upgrade bars (linked directly to the student's UCAS progress!) -->
+                    <div class="space-y-2">
+                        <div>
+                            <div class="flex justify-between text-[11px] text-stone-400">
+                                <span>REGISTRATION STEPS</span>
+                                <span id="bar-reg-pct">0%</span>
+                            </div>
+                            <div class="w-full bg-stone-800 h-1.5 rounded-full mt-1 overflow-hidden">
+                                <div id="bar-reg" class="bg-blue-500 h-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[11px] text-stone-400">
+                                <span>DEADLINE SYNCHRONIZATION</span>
+                                <span id="bar-dead-pct">0%</span>
+                            </div>
+                            <div class="w-full bg-stone-800 h-1.5 rounded-full mt-1 overflow-hidden">
+                                <div id="bar-dead" class="bg-amber-500 h-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[11px] text-stone-400">
+                                <span>FINANCIAL RECONNAISSANCE</span>
+                                <span id="bar-fin-pct">0%</span>
+                            </div>
+                            <div class="w-full bg-stone-800 h-1.5 rounded-full mt-1 overflow-hidden">
+                                <div id="bar-fin" class="bg-red-500 h-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[11px] text-stone-400">
+                                <span>PLATOON BALANCER (UNIVERSITIES)</span>
+                                <span id="bar-uni-pct">0%</span>
+                            </div>
+                            <div class="w-full bg-stone-800 h-1.5 rounded-full mt-1 overflow-hidden">
+                                <div id="bar-uni" class="bg-emerald-500 h-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- RIGHT COLUMN: Tactical Mission Engine Area -->
+        <section class="lg:col-span-8 bg-[#172018] rounded-xl border border-[#2e3e31] p-4 flex flex-col justify-between shadow-2xl relative min-h-[550px]">
+            
+            <!-- Objective Tabs (Visible milestones representing our path) -->
+            <div class="grid grid-cols-5 gap-1 md:gap-2 mb-4">
+                <button id="tab-0" class="tab-btn bg-emerald-950 border-2 border-emerald-500 text-emerald-400 py-2 rounded-lg text-xs font-bold transition-all duration-200">
+                    <span class="block text-[9px] opacity-70">PHASE 1</span>
+                    Briefing
+                </button>
+                <button id="tab-1" class="tab-btn bg-[#233125] border border-[#2f4031] text-stone-400 py-2 rounded-lg text-xs font-bold opacity-60 pointer-events-none transition-all duration-200">
+                    <span class="block text-[9px] opacity-70">PHASE 2</span>
+                    Register
+                </button>
+                <button id="tab-2" class="tab-btn bg-[#233125] border border-[#2f4031] text-stone-400 py-2 rounded-lg text-xs font-bold opacity-60 pointer-events-none transition-all duration-200">
+                    <span class="block text-[9px] opacity-70">PHASE 3</span>
+                    Turret Run
+                </button>
+                <button id="tab-3" class="tab-btn bg-[#233125] border border-[#2f4031] text-stone-400 py-2 rounded-lg text-xs font-bold opacity-60 pointer-events-none transition-all duration-200">
+                    <span class="block text-[9px] opacity-70">PHASE 4</span>
+                    Timelines
+                </button>
+                <button id="tab-4" class="tab-btn bg-[#233125] border border-[#2f4031] text-stone-400 py-2 rounded-lg text-xs font-bold opacity-60 pointer-events-none transition-all duration-200">
+                    <span class="block text-[9px] opacity-70">PHASE 5</span>
+                    Platoon
+                </button>
+            </div>
+
+            <!-- Active Mission Viewport -->
+            <div id="mission-viewport" class="flex-grow bg-[#0d140e] rounded-lg border border-[#243527] p-4 md:p-6 relative overflow-y-auto min-h-[380px] max-h-[500px]">
+                
+                <!-- PHASE 0: Briefing Welcome Screen -->
+                <div id="screen-briefing" class="space-y-4">
+                    <div class="text-center space-y-2 py-4">
+                        <div class="inline-block bg-[#1b3021] text-emerald-400 text-xs px-3 py-1 rounded-full border border-emerald-800 font-bold tracking-wider">OPERATION UNI COMMENCE</div>
+                        <h3 class="text-2xl font-extrabold text-white tracking-tight">The Road to Higher Digital Education</h3>
+                        <p class="text-sm text-stone-400 max-w-lg mx-auto">Configure your tank, link to Ada, the National College for Digital Skills, sync important timelines, and conquer the admissions puzzle.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-[#18251a] p-4 rounded-lg border border-[#344a37]">
+                            <h4 class="text-xs font-bold text-emerald-400 tracking-wider mb-2 uppercase">Why do this campaign?</h4>
+                            <ul class="text-xs text-stone-300 space-y-2 list-disc pl-4 leading-relaxed">
+                                <li><strong>Computer Science edge:</strong> Tech graduates have the highest lifetime forecasting outcomes.</li>
+                                <li><strong>No fee to apply:</strong> No tuition barrier up front, covered completely by tuition loans.</li>
+                                <li><strong>Full support:</strong> Linking your account allows our Ada advisors to back you up with the ultimate reference.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-[#1e1c25] p-4 rounded-lg border border-[#3e344e]">
+                            <h4 class="text-xs font-bold text-indigo-400 tracking-wider mb-2 uppercase">UCAS Platoon Core Pillars</h4>
+                            <p class="text-xs text-stone-300 mb-3 leading-relaxed">To cross the finish line safely, you will construct an application consisting of:</p>
+                            <div class="grid grid-cols-2 gap-2 text-[10px] font-bold text-center">
+                                <div class="p-2 rounded bg-[#242131] text-indigo-300 border border-[#4d4469]">Personal Statement</div>
+                                <div class="p-2 rounded bg-[#242131] text-indigo-300 border border-[#4d4469]">5 Balanced Choices</div>
+                                <div class="p-2 rounded bg-[#242131] text-indigo-300 border border-[#4d4469]">Academic Reference</div>
+                                <div class="p-2 rounded bg-[#242131] text-indigo-300 border border-[#4d4469]">Verified Qualifications</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center pt-4">
+                        <button onclick="advanceToPhase1()" class="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-extrabold text-sm px-8 py-3 rounded-xl border border-emerald-400 shadow-md transition-all scale-100 hover:scale-105 active:scale-95 duration-150">
+                            COMMENCE BRIEFING MISSION ➔
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PHASE 1: Registration Form Decoder -->
+                <div id="screen-register" class="space-y-4 hidden">
+                    <div class="flex justify-between items-center border-b border-[#253828] pb-2 mb-3">
+                        <h3 class="text-lg font-bold text-emerald-400 retro-font">Decipher Registration Protocols</h3>
+                        <span class="text-xs text-stone-400 bg-stone-900 px-2 py-0.5 rounded font-mono">TASK 1/4</span>
+                    </div>
+
+                    <p class="text-xs text-stone-300 leading-relaxed bg-[#1b261d] p-3 rounded border border-emerald-900">
+                        <strong>Briefing:</strong> Set up your UCAS account coordinates correctly. Link your coordinates to Ada's central network. Choose the correct settings below to patch your crew in.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                        <!-- Email choice -->
+                        <div class="bg-[#151c16] p-3 rounded border border-stone-800 space-y-2">
+                            <label class="block text-xs font-bold text-stone-300 uppercase tracking-wide">1. Primary Email Target</label>
+                            <p class="text-[10px] text-stone-400 leading-tight">Which contact details secure safe, lifelong transmission access?</p>
+                            <div class="grid grid-cols-2 gap-2 pt-1">
+                                <button onclick="selectOption('email', 'personal', this)" class="reg-opt bg-[#1f2a20] border border-emerald-800 hover:border-emerald-500 p-2 text-xs rounded font-medium text-emerald-400 text-center transition">
+                                    Personal Email
+                                </button>
+                                <button onclick="selectOption('email', 'school', this)" class="reg-opt bg-stone-900 border border-stone-800 hover:border-stone-700 p-2 text-xs rounded font-medium text-stone-400 text-center transition">
+                                    School/College Email
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Year choice -->
+                        <div class="bg-[#151c16] p-3 rounded border border-stone-800 space-y-2">
+                            <label class="block text-xs font-bold text-stone-300 uppercase tracking-wide">2. Start Year Coordinate</label>
+                            <p class="text-[10px] text-stone-400 leading-tight">When are you coordinates planning to start your university study?</p>
+                            <div class="grid grid-cols-3 gap-1 pt-1">
+                                <button onclick="selectOption('year', '2025', this)" class="reg-opt bg-stone-900 border border-stone-800 p-2 text-[11px] rounded font-medium text-stone-400 text-center transition">
+                                    2025
+                                </button>
+                                <button onclick="selectOption('year', '2026', this)" class="reg-opt bg-stone-900 border border-stone-800 p-2 text-[11px] rounded font-medium text-stone-400 text-center transition">
+                                    2026
+                                </button>
+                                <button onclick="selectOption('year', '2027', this)" class="reg-opt bg-[#1f2a20] border border-emerald-800 p-2 text-[11px] rounded font-medium text-emerald-400 text-center transition">
+                                    2027 (Undergrad)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- School name check -->
+                        <div class="bg-[#151c16] p-3 rounded border border-stone-800 space-y-2">
+                            <label class="block text-xs font-bold text-stone-300 uppercase tracking-wide">3. School Link Name</label>
+                            <p class="text-[10px] text-stone-400 leading-tight">Type or verify the official hub location name to grant tracking permission.</p>
+                            <input id="reg-school-input" type="text" placeholder="Start typing school name..." value="Ada, the National College for Digital Skills" class="w-full bg-[#1e281f] border border-emerald-800 text-stone-100 text-xs rounded p-2 focus:ring-1 focus:ring-emerald-500 focus:outline-none"/>
+                        </div>
+
+                        <!-- Buzzword entry -->
+                        <div class="bg-[#151c16] p-3 rounded border border-stone-800 space-y-2">
+                            <label class="block text-xs font-bold text-stone-300 uppercase tracking-wide">4. Central Buzzword</label>
+                            <p class="text-[10px] text-stone-400 leading-tight">Input the secret access key from your tutor to connect references.</p>
+                            <div class="flex space-x-2">
+                                <input id="reg-buzzword-input" type="text" placeholder="Enter buzzword..." class="flex-grow bg-[#1e281f] border border-emerald-800 text-stone-100 text-xs rounded p-2 focus:ring-1 focus:ring-emerald-500 focus:outline-none uppercase" value="COHORT10"/>
+                                <button onclick="verifyBuzzword()" class="bg-emerald-700 hover:bg-emerald-600 border border-emerald-500 text-xs px-3 rounded font-bold transition text-white">CHECK</button>
+                            </div>
+                            <p id="buzzword-status" class="text-[9px] text-emerald-500 font-mono"></p>
+                        </div>
+                    </div>
+
+                    <!-- Submit Registration -->
+                    <div class="flex justify-between items-center pt-4 border-t border-[#253828]">
+                        <p class="text-[10px] text-stone-400 max-w-sm">Ensure FSM waivers are marked in "More about you" later to bypass any cost!</p>
+                        <button onclick="submitRegistrationPhase()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-6 py-2.5 rounded-lg border border-emerald-400 shadow transition-all duration-150">
+                            INSTALL ACCESS MODULE ➔
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PHASE 2: Turret target shooter (Visual Game) -->
+                <div id="screen-game" class="space-y-4 hidden">
+                    <div class="flex justify-between items-center border-b border-[#253828] pb-2 mb-3">
+                        <h3 class="text-lg font-bold text-emerald-400 retro-font">Turret Run: Blasting Misconceptions</h3>
+                        <span class="text-xs text-stone-400 bg-stone-900 px-2 py-0.5 rounded font-mono">TASK 2/4</span>
+                    </div>
+
+                    <p class="text-xs text-stone-300 leading-tight">
+                        <strong>Controls:</strong> Click or tap to aim and shoot at target balloons! Blast away harmful myths (Red) while collecting helpful truths (Green/Gold). Avoid shooting truths!
+                    </p>
+
+                    <!-- Interactive Canvas Area -->
+                    <div class="relative bg-black rounded-lg border border-emerald-950 overflow-hidden" style="height: 240px;">
+                        <canvas id="game-canvas" class="block w-full h-full"></canvas>
+                        
+                        <!-- Overlay Hud -->
+                        <div class="absolute top-2 left-2 bg-[#121813]/80 p-2 rounded text-xs border border-emerald-900 flex space-x-4">
+                            <div>Ammo: <span id="game-ammo" class="text-emerald-400 font-bold">Unlimited</span></div>
+                            <div>Score: <span id="game-hits" class="text-amber-400 font-bold">0</span></div>
+                        </div>
+
+                        <!-- Completion check popup -->
+                        <div id="game-success-banner" class="absolute inset-0 bg-[#121813]/95 flex flex-col items-center justify-center space-y-3 hidden">
+                            <span class="text-xs text-emerald-400 font-bold tracking-wider">SKIRMISH CLEARED!</span>
+                            <h4 class="text-lg font-bold text-white text-center px-4">All Tactical Barriers Blown Away Successfully!</h4>
+                            <p class="text-xs text-stone-400 max-w-md text-center">You correctly destroyed myths like "Applications cost upfront money" and collected FSM Waiver, Buzzwords, and correct Finance plans.</p>
+                            <button onclick="advanceToPhase3()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-6 py-2 rounded border border-emerald-400 transition">
+                                PROCEED TO TIMELINE SYNC ➔
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center text-[10px] text-stone-400">
+                        <span>💡 Green Targets: Tuition Loans cover full costs. Red Targets: Applying requires complex upfront payment.</span>
+                        <button onclick="skipGame()" class="text-stone-500 hover:text-stone-300 underline font-mono">Skip Skirmish (SEND Accomodation)</button>
+                    </div>
+                </div>
+
+                <!-- PHASE 3: Drag & Sort timeline game -->
+                <div id="screen-timeline" class="space-y-4 hidden">
+                    <div class="flex justify-between items-center border-b border-[#253828] pb-2 mb-3">
+                        <h3 class="text-lg font-bold text-emerald-400 retro-font">Chronological Timeline Sync</h3>
+                        <span class="text-xs text-stone-400 bg-stone-900 px-2 py-0.5 rounded font-mono">TASK 3/4</span>
+                    </div>
+
+                    <p class="text-xs text-stone-300 leading-relaxed bg-[#1b261d] p-3 rounded border border-emerald-900">
+                        <strong>LSA Assistant:</strong> College deadlines are critical. Early submissions yield higher competitive offers. Click to arrange the internal and external timeline triggers from earliest to latest.
+                    </p>
+
+                    <!-- Interactive list with simple click-to-swap mechanism -->
+                    <div class="space-y-2 mt-4" id="timeline-container">
+                        <!-- Items populated dynamically to support touch and simple SEND click mechanics -->
+                    </div>
+
+                    <div class="flex justify-between items-center pt-4 border-t border-[#253828]">
+                        <button onclick="resetTimeline()" class="text-xs text-stone-400 hover:text-stone-200 font-medium">Reset Sequence</button>
+                        <button onclick="verifyTimeline()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-6 py-2.5 rounded-lg border border-emerald-400 transition shadow">
+                            VERIFY ALIGNMENT ➔
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PHASE 4: Platoon Balancer (Choose Universities) -->
+                <div id="screen-platoon" class="space-y-4 hidden">
+                    <div class="flex justify-between items-center border-b border-[#253828] pb-2 mb-3">
+                        <h3 class="text-lg font-bold text-emerald-400 retro-font">Launch Hub: Balance Your Platoon</h3>
+                        <span class="text-xs text-stone-400 bg-stone-900 px-2 py-0.5 rounded font-mono">TASK 4/4</span>
+                    </div>
+
+                    <p class="text-xs text-stone-300 leading-relaxed bg-[#1d1f2a] p-3 rounded border border-indigo-950">
+                        <strong>Tactical Platoon Builder:</strong> Create a balanced spread of 5 university choices. Aim for **Aspirational** (reach), **Solid** (realistic match), and **Safe** (guaranteed back-up) options to guarantee an outstanding campaign.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                        <!-- Left: Selection Slots -->
+                        <div class="md:col-span-7 space-y-3">
+                            <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wide">University Spread Positions</h4>
+                            
+                            <!-- Balanced slots -->
+                            <div class="space-y-2 text-xs">
+                                <div class="p-2 bg-[#1d271f] border border-emerald-800 rounded flex justify-between items-center">
+                                    <div>
+                                        <span class="font-bold text-emerald-400 block text-[10px]">1. ASPIRATIONAL RANGE (Highly Competitive)</span>
+                                        <span id="slot-0" class="text-stone-100 font-mono italic">Slot empty - Click candidate below</span>
+                                    </div>
+                                    <button onclick="clearSlot(0)" class="text-[10px] text-red-400 hover:text-red-300 underline shrink-0 ml-2">Clear</button>
+                                </div>
+                                <div class="p-2 bg-[#1d271f] border border-emerald-800 rounded flex justify-between items-center">
+                                    <div>
+                                        <span class="font-bold text-emerald-400 block text-[10px]">2. ASPIRATIONAL RANGE (Highly Competitive)</span>
+                                        <span id="slot-1" class="text-stone-100 font-mono italic">Slot empty - Click candidate below</span>
+                                    </div>
+                                    <button onclick="clearSlot(1)" class="text-[10px] text-red-400 hover:text-red-300 underline shrink-0 ml-2">Clear</button>
+                                </div>
+                                <div class="p-2 bg-[#20272c] border border-blue-900 rounded flex justify-between items-center">
+                                    <div>
+                                        <span class="font-bold text-blue-400 block text-[10px]">3. SOLID RANGE (Good Grade Matches)</span>
+                                        <span id="slot-2" class="text-stone-100 font-mono italic">Slot empty - Click candidate below</span>
+                                    </div>
+                                    <button onclick="clearSlot(2)" class="text-[10px] text-red-400 hover:text-red-300 underline shrink-0 ml-2">Clear</button>
+                                </div>
+                                <div class="p-2 bg-[#20272c] border border-blue-900 rounded flex justify-between items-center">
+                                    <div>
+                                        <span class="font-bold text-blue-400 block text-[10px]">4. SOLID RANGE (Good Grade Matches)</span>
+                                        <span id="slot-3" class="text-stone-100 font-mono italic">Slot empty - Click candidate below</span>
+                                    </div>
+                                    <button onclick="clearSlot(3)" class="text-[10px] text-red-400 hover:text-red-300 underline shrink-0 ml-2">Clear</button>
+                                </div>
+                                <div class="p-2 bg-[#2a221a] border border-amber-900 rounded flex justify-between items-center">
+                                    <div>
+                                        <span class="font-bold text-amber-500 block text-[10px]">5. SAFE RANGE (Surefire Back-Up)</span>
+                                        <span id="slot-4" class="text-stone-100 font-mono italic">Slot empty - Click candidate below</span>
+                                    </div>
+                                    <button onclick="clearSlot(4)" class="text-[10px] text-red-400 hover:text-red-300 underline shrink-0 ml-2">Clear</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: University Candidate Platoon -->
+                        <div class="md:col-span-5 space-y-3">
+                            <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wide">Tech Pathway Candidates</h4>
+                            <div class="space-y-1.5 max-h-[250px] overflow-y-auto pr-1">
+                                <button onclick="selectUniversityCandidate('Cambridge (CompSci) - Aspirational')" class="w-full text-left p-2 rounded bg-stone-950 border border-stone-800 hover:border-emerald-600 transition text-[11px] block">
+                                    <strong class="text-emerald-400">Cambridge University</strong><br/>
+                                    <span class="text-stone-300">BSc Computer Science (A*A*A)</span>
+                                </button>
+                                <button onclick="selectUniversityCandidate('Oxford (CompSci) - Aspirational')" class="w-full text-left p-2 rounded bg-stone-950 border border-stone-800 hover:border-emerald-600 transition text-[11px] block">
+                                    <strong class="text-emerald-400">Oxford University</strong><br/>
+                                    <span class="text-stone-300">BSc Computer Science (A*AA)</span>
+                                </button>
+                                <button onclick="selectUniversityCandidate('Imperial (Software Eng) - Aspirational')" class="w-full text-left p-2 rounded bg-stone-950 border border-stone-800 hover:border-emerald-600 transition text-[11px] block">
+                                    <strong class="text-emerald-400">Imperial College London</strong><br/>
+                                    <span class="text-stone-300">BEng Software Engineering (A*A*A)</span>
+                                </button>
+                                <button onclick="selectUniversityCandidate('King\'s College (CompSci) - Solid')" class="w-full text-left p-2 rounded bg-stone-950 border border-stone-800 hover:border-blue-600 transition text-[11px] block">
+                                    <strong class="text-blue-400">King's College London</strong><br/>
+                                    <span class="text-stone-300">BSc Computer Science (AAA)</span>
+                                </button>
+                                <button onclick="selectUniversityCandidate('Bristol (Data Science) - Solid')" class="w-full text-left p-2 rounded bg-stone-950 border border-stone-800 hover:border-blue-600 transition text-[11px] block">
+                                    <strong class="text-blue-400">University of Bristol</strong><br/>
+                                    <span class="text-stone-300">BSc Data Science (AAA)</span>
+                                </button>
+                                <button onclick="selectUniversityCandidate('Queen Mary (Software Eng) - Safe')" class="w-full text-left p-2 rounded bg-stone-950 border border-stone-800 hover:border-amber-600 transition text-[11px] block">
+                                    <strong class="text-amber-500">Queen Mary University</strong><br/>
+                                    <span class="text-stone-300">BSc Software Engineering (ABB)</span>
+                                </button>
+                                <button onclick="selectUniversityCandidate('Manchester Met (CompSci) - Safe')" class="w-full text-left p-2 rounded bg-stone-950 border border-stone-800 hover:border-amber-600 transition text-[11px] block">
+                                    <strong class="text-amber-500">Manchester Met University</strong><br/>
+                                    <span class="text-stone-300">BSc Computer Science (BBB)</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Verify Platoon Spread -->
+                    <div class="flex justify-between items-center pt-4 border-t border-[#253828]">
+                        <p class="text-[10px] text-stone-400">Tip: Keep Imperial or Oxbridge in the Aspiring pool and safer ABB options below for backup.</p>
+                        <button onclick="launchPlatoon()" class="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-extrabold text-xs px-8 py-3 rounded-xl border border-emerald-400 shadow-md transition-all scale-100 hover:scale-105 active:scale-95 duration-150">
+                            DEPLOY VANGUARD FOR REVIEW ➔
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PHASE 5: Victory Launch Pad Screen -->
+                <div id="screen-victory" class="space-y-4 hidden text-center py-4">
+                    <div class="inline-block bg-emerald-950 text-emerald-400 text-xs px-3 py-1 rounded border border-emerald-800 font-bold tracking-wider retro-font uppercase radar-light">
+                        Mission Achieved: Vanguard Deployed
+                    </div>
+                    
+                    <h3 class="text-3xl font-extrabold text-white tracking-tight">Your Progression Campaign is Complete!</h3>
+                    <p class="text-sm text-stone-400 max-w-lg mx-auto">You have mastered the UCAS guidelines, linked up with Ada Digital, synced key internal milestones, and deployed a flawless university selection platoon.</p>
+
+                    <!-- Tactical Achievement Badge Card -->
+                    <div class="max-w-md mx-auto bg-[#1b261d] p-6 rounded-xl border-2 border-emerald-500 shadow-2xl space-y-4 text-left relative">
+                        <div class="absolute top-2 right-2 text-[10px] text-emerald-500 font-mono">CODE: COHORT10</div>
+                        <h4 class="text-sm font-bold text-emerald-400 uppercase tracking-widest retro-font border-b border-[#2d3e30] pb-2">Ada IPP Certificate of Readiness</h4>
+                        
+                        <div class="space-y-2 text-xs text-stone-300">
+                            <p>👨‍🎓 <strong>Candidate Student Status:</strong> Outstanding Digital Aspirant</p>
+                            <p>🛡️ <strong>School Link Status:</strong> Verified with sharing consent (Yes)</p>
+                            <p>📅 <strong>Core Deadlines Synced:</strong> Internal shortlists set, external 2027 start mapped</p>
+                            <p>💰 <strong>Repayment Rules:</strong> 9% only on earnings exceeding £25,000</p>
+                        </div>
+
+                        <div class="bg-[#111912] p-3 rounded text-center border border-[#273a2a]">
+                            <span class="text-amber-400 font-extrabold text-lg retro-font">HIGH FORECAST EARNINGS</span>
+                            <p class="text-[10px] text-stone-400 mt-0.5">As a Computer Science graduate, you are on track to out-earn non-degrees across your career!</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row justify-center items-center gap-3 pt-4">
+                        <button onclick="printIPPCertificate()" class="w-full sm:w-auto bg-[#253528] hover:bg-[#344b39] text-stone-200 hover:text-white font-semibold text-xs px-6 py-3 rounded-lg border border-emerald-700 transition flex items-center justify-center space-x-1">
+                            <span>📄 Print Progression Outline</span>
+                        </button>
+                        <button onclick="resetWholeCampaign()" class="w-full sm:w-auto bg-[#2b1f1f] hover:bg-[#3d2c2c] text-red-300 hover:text-white font-semibold text-xs px-6 py-3 rounded-lg border border-red-900 transition">
+                            Reset Campaign Map
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bottom Controls / Status Logs -->
+            <div class="mt-4 pt-3 border-t border-[#253828] flex flex-col md:flex-row justify-between items-center text-xs text-stone-400 space-y-2 md:space-y-0">
+                <div class="flex items-center space-x-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 radar-light inline-block"></span>
+                    <span id="tactical-log" class="font-mono">Log: Commencing Briefing Mission. Chassis standard.</span>
+                </div>
+                <div class="flex space-x-4">
+                    <span>Help buzzword: <strong class="text-emerald-400 font-mono">cohort10</strong></span>
+                    <span>Entry: <strong class="text-emerald-400 font-mono">2027</strong></span>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Bottom Footer Brand -->
+    <footer class="bg-[#121813] text-center py-3 border-t border-[#202d23] text-[10px] text-stone-500">
+        Ada, the National College for Digital Skills • UCAS Progression Support Game • Crafted with care by LSA
+    </footer>
+
+    <script>
+        // --- GAME SOUNDS SYNTH MODULE (Web Audio API - No external asset dependencies) ---
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioCtx;
+        }
+
+        function playSynthSound(frequency, type, duration, volume) {
+            try {
+                const ctx = getAudioContext();
+                if (ctx.state === 'suspended') {
+                    ctx.resume();
+                }
+                const osc = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                
+                osc.type = type;
+                osc.frequency.setValueAtTime(frequency, ctx.currentTime);
+                
+                gainNode.gain.setValueAtTime(volume, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+                
+                osc.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                
+                osc.start();
+                osc.stop(ctx.currentTime + duration);
+            } catch (e) {
+                console.log("Audio not allowed yet by user interaction context.");
+            }
+        }
+
+        function playSuccessSound() {
+            playSynthSound(523.25, 'triangle', 0.2, 0.1); // C5
+            setTimeout(() => playSynthSound(659.25, 'triangle', 0.2, 0.1), 100); // E5
+            setTimeout(() => playSynthSound(783.99, 'triangle', 0.4, 0.15), 200); // G5
+        }
+
+        function playFailSound() {
+            playSynthSound(220, 'sawtooth', 0.4, 0.1); // A3
+        }
+
+        function playLaserSound() {
+            playSynthSound(880, 'sine', 0.15, 0.05);
+        }
+
+        function playExplosionSound() {
+            playSynthSound(80, 'sawtooth', 0.5, 0.3);
+        }
+
+        // --- STATE MANAGEMENT ---
+        let score = 0;
+        let progress = 5;
+        let activePhase = 0;
+        let speechHistory = [];
+
+        // Track user chosen modular registration options
+        let userRegOptions = {
+            email: '',
+            year: '',
+            school: 'Ada, the National College for Digital Skills',
+            buzzwordVerified: false
+        };
+
+        // Track timeline items sorting state
+        const originalTimelineData = [
+            { id: 'timeline-a', date: '01/09/2026', text: 'Personal Statement Draft complete (Internal Limit)' },
+            { id: 'timeline-b', date: '01/09/2026', text: 'Shortlist of 5 Safe/Solid/Aspirational universities set' },
+            { id: 'timeline-c', date: '09/10/2026', text: 'Submit fully prepared UCAS Form for college review' },
+            { id: 'timeline-d', date: '15/10/2026', text: 'Oxbridge external applications close strictly' },
+            { id: 'timeline-e', date: '13/01/2027', text: 'External standard UCAS applications close' },
+            { id: 'timeline-f', date: '05/05/2027', text: 'Confirm final choices (Firm & Insurance selections)' }
+        ];
+        let currentTimelineOrder = [...originalTimelineData];
+
+        // Track platoon slots
+        let universitySlots = [null, null, null, null, null];
+
+        // --- SPEECH SYSTEM (Text-to-Speech Accessibility for SEND students) ---
+        function speakCurrentInstruction() {
+            const speechText = document.getElementById('lsa-speech').innerText;
+            if ('speechSynthesis' in window) {
+                // Cancel active utterances first
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(speechText);
+                utterance.rate = 1.0; 
+                utterance.pitch = 1.1; // Gentle, friendly high-pitched tone
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("Text-to-Speech is not supported natively in this browser version.");
+            }
+        }
+
+        function changeLsaSpeech(text, playBeep = true) {
+            document.getElementById('lsa-speech').innerText = text;
+            if (playBeep) {
+                playSynthSound(440, 'sine', 0.1, 0.05); // Gentle alert beep
+            }
+        }
+
+        // --- SYSTEM ENGINE INITIALIZATIONS ---
+        window.onload = function() {
+            getAudioContext();
+            updateLog("Awaiting Commander. Chassis standard. Link to 'Ada' ready.");
+            initGameEngine();
+        };
+
+        function updateScore(amount) {
+            score += amount;
+            document.getElementById('hud-score').innerText = score + " XP";
+        }
+
+        function updateProgress(percentage) {
+            progress = percentage;
+            document.getElementById('hud-progress-bar').style.width = percentage + "%";
+        }
+
+        function updateLog(message) {
+            document.getElementById('tactical-log').innerText = "Log: " + message;
+        }
+
+        // --- SCREEN ROUTING MODULES ---
+        function showScreen(screenId) {
+            const screens = ['screen-briefing', 'screen-register', 'screen-game', 'screen-timeline', 'screen-platoon', 'screen-victory'];
+            screens.forEach(s => {
+                document.getElementById(s).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+
+            // Tab visual styling updates
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach((tab, index) => {
+                if (screenId === `screen-victory` && index === 4) {
+                    // Stay fully green
+                } else if (screenId === `screen-briefing` && index === 0) {
+                    highlightTab(tab);
+                } else if (screenId === `screen-register` && index === 1) {
+                    highlightTab(tab);
+                } else if (screenId === `screen-game` && index === 2) {
+                    highlightTab(tab);
+                } else if (screenId === `screen-timeline` && index === 3) {
+                    highlightTab(tab);
+                } else if (screenId === `screen-platoon` && index === 4) {
+                    highlightTab(tab);
+                } else {
+                    unhighlightTab(tab);
+                }
+            });
+        }
+
+        function highlightTab(tab) {
+            tab.className = "tab-btn bg-emerald-950 border-2 border-emerald-500 text-emerald-400 py-2 rounded-lg text-xs font-bold transition-all duration-200 pointer-events-auto opacity-100";
+        }
+
+        function unhighlightTab(tab) {
+            tab.className = "tab-btn bg-[#1a231c] border border-[#233125] text-stone-500 py-2 rounded-lg text-xs font-bold opacity-50 pointer-events-none transition-all duration-200";
+        }
+
+        // --- BRIEFING SCREEN PHASE ---
+        function advanceToPhase1() {
+            updateScore(50);
+            updateProgress(20);
+            showScreen('screen-register');
+            document.getElementById('tab-1').classList.remove('pointer-events-none');
+            
+            // Visual Tank hull progression update
+            document.getElementById('tank-hull').setAttribute('fill-opacity', '0.4');
+            document.getElementById('tank-hull').style.color = '#10b981';
+            document.getElementById('chassis-badge').innerText = "Hull: Reinforced";
+            document.getElementById('chassis-badge').className = "absolute bottom-2 left-2 text-[10px] px-1.5 py-0.5 rounded bg-emerald-950 border border-emerald-500 font-mono text-emerald-400 font-bold";
+
+            changeLsaSpeech("Phase 1: Let's decipher the Registration protocols. Ensure we register with a PERSONAL email, select the year 2027, and input the secret buzzword 'cohort10' to link with Ada College.");
+            updateLog("Objective: Setup Registration Hub parameters.");
+        }
+
+        // --- PHASE 1: REGISTRATION ---
+        function selectOption(category, value, element) {
+            userRegOptions[category] = value;
+            
+            // Un-highlight other buttons in same section
+            const siblingButtons = element.parentNode.querySelectorAll('button');
+            siblingButtons.forEach(btn => {
+                btn.className = "reg-opt bg-stone-900 border border-stone-800 p-2 text-xs rounded font-medium text-stone-400 text-center transition";
+            });
+
+            // Highlight chosen button
+            element.className = "reg-opt bg-[#1f2a20] border-2 border-emerald-500 p-2 text-xs rounded font-bold text-emerald-400 text-center transition scale-105 duration-150";
+            
+            playSynthSound(440, 'triangle', 0.1, 0.05);
+
+            // Dynamically increment partial progress bar
+            updateRegistrationModuleBar();
+        }
+
+        function verifyBuzzword() {
+            const val = document.getElementById('reg-buzzword-input').value.trim().toLowerCase();
+            const statusEl = document.getElementById('buzzword-status');
+            
+            if (val === 'cohort10') {
+                userRegOptions.buzzwordVerified = true;
+                statusEl.innerText = "✓ BUZZWORD CONFIRMED: CONNECTED TO ADA HUB";
+                statusEl.className = "text-[9px] text-emerald-400 font-mono font-bold";
+                playSuccessSound();
+                updateRegistrationModuleBar();
+            } else {
+                userRegOptions.buzzwordVerified = false;
+                statusEl.innerText = "✗ INCORRECT BUZZWORD. TRY 'cohort10'";
+                statusEl.className = "text-[9px] text-red-400 font-mono font-bold";
+                playFailSound();
+            }
+        }
+
+        function updateRegistrationModuleBar() {
+            let count = 0;
+            if (userRegOptions.email === 'personal') count += 25;
+            if (userRegOptions.year === '2027') count += 25;
+            if (userRegOptions.buzzwordVerified) count += 50;
+
+            document.getElementById('bar-reg').style.width = count + "%";
+            document.getElementById('bar-reg-pct').innerText = count + "%";
+        }
+
+        function submitRegistrationPhase() {
+            if (userRegOptions.email !== 'personal') {
+                changeLsaSpeech("Warning! Registering with a school email instead of a personal email risk losing future access once you graduate high school. Please choose Personal Email!");
+                playFailSound();
+                return;
+            }
+            if (userRegOptions.year !== '2027') {
+                changeLsaSpeech("Check start year! Applications made now are for the 2027 entry cycle, including deferred. Make sure 2027 is selected!");
+                playFailSound();
+                return;
+            }
+            if (!userRegOptions.buzzwordVerified) {
+                changeLsaSpeech("Warning: Ensure you input the secret buzzword 'cohort10' and verify it to safely establish link permission with Ada National College.");
+                playFailSound();
+                return;
+            }
+
+            // Success configuration
+            updateScore(150);
+            updateProgress(40);
+            showScreen('screen-game');
+            document.getElementById('tab-2').classList.remove('pointer-events-none');
+            
+            // Upgrade visual tank turret gun
+            document.getElementById('tank-barrel').style.color = '#10b981';
+            document.getElementById('tank-barrel').setAttribute('stroke-width', '6');
+            document.getElementById('weapon-badge').innerText = "Aim: Calibrated";
+            document.getElementById('weapon-badge').className = "absolute top-2 right-2 text-[10px] px-1.5 py-0.5 rounded bg-emerald-950 border border-emerald-500 font-mono text-emerald-400 font-bold";
+
+            changeLsaSpeech("Superb! You correctly connected the registration parameters. Turret Aim calibrated. Now engage 'Turret Run' to blow up myths and collect helpful truths on financial aid!");
+            updateLog("Aim module online. Ready for Skirmish 2.");
+        }
+
+        // --- PHASE 2: CANV_ARCADE TARGET RUN GAME ---
+        let canvas, ctx;
+        let gameLoopId;
+        let ammoCount = 999;
+        let scoreCount = 0;
+        let targets = [];
+        let particles = [];
+        let targetSpeed = 1.0;
+        let spawnTimer = 0;
+        let turretAngle = 0;
+        let gameActive = false;
+
+        function initGameEngine() {
+            canvas = document.getElementById('game-canvas');
+            ctx = canvas.getContext('2d');
+            
+            // Adjust canvas to container sizing cleanly
+            resizeGameCanvas();
+            window.addEventListener('resize', resizeGameCanvas);
+
+            // Custom click shooter trigger
+            canvas.addEventListener('mousedown', function(e) {
+                if (!gameActive) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                fireTurretAt(x, y);
+            });
+
+            canvas.addEventListener('touchstart', function(e) {
+                if (!gameActive || e.touches.length === 0) return;
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const x = e.touches[0].clientX - rect.left;
+                const y = e.touches[0].clientY - rect.top;
+                fireTurretAt(x, y);
+            });
+        }
+
+        function resizeGameCanvas() {
+            if (canvas) {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = 240;
+            }
+        }
+
+        function startGameEngine() {
+            gameActive = true;
+            scoreCount = 0;
+            targets = [];
+            particles = [];
+            targetSpeed = 0.8;
+            spawnTimer = 0;
+            updateGameScoreDisplay();
+            
+            if (gameLoopId) cancelAnimationFrame(gameLoopId);
+            gameLoop();
+        }
+
+        function stopGameEngine() {
+            gameActive = false;
+            if (gameLoopId) cancelAnimationFrame(gameLoopId);
+        }
+
+        function skipGame() {
+            stopGameEngine();
+            scoreCount = 10;
+            updateGameScoreDisplay();
+            document.getElementById('game-success-banner').classList.remove('hidden');
+            playSuccessSound();
+        }
+
+        function updateGameScoreDisplay() {
+            document.getElementById('game-hits').innerText = scoreCount + "/10";
+        }
+
+        function fireTurretAt(targetX, targetY) {
+            playLaserSound();
+            
+            // Draw a quick temporary beam
+            ctx.beginPath();
+            ctx.strokeStyle = '#22c55e';
+            ctx.lineWidth = 3;
+            ctx.moveTo(canvas.width / 2, canvas.height - 15);
+            ctx.lineTo(targetX, targetY);
+            ctx.stroke();
+
+            // Check hit collisions
+            for (let i = targets.length - 1; i >= 0; i--) {
+                const t = targets[i];
+                const dx = targetX - t.x;
+                const dy = targetY - t.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                
+                if (dist < t.radius + 15) {
+                    handleTargetHit(t, i);
+                    break;
+                }
+            }
+        }
+
+        function handleTargetHit(target, index) {
+            targets.splice(index, 1);
+            createHitParticles(target.x, target.y, target.color);
+            playExplosionSound();
+
+            if (target.isMyth) {
+                scoreCount++;
+                updateGameScoreDisplay();
+                updateLog("HIT! Blasted barrier: " + target.text);
+            } else {
+                scoreCount = Math.max(0, scoreCount - 1);
+                updateGameScoreDisplay();
+                updateLog("COLLATERAL DAMAGE! Truth destroyed: " + target.text);
+            }
+
+            if (scoreCount >= 10) {
+                gameActive = false;
+                document.getElementById('game-success-banner').classList.remove('hidden');
+                playSuccessSound();
+            }
+        }
+
+        function createHitParticles(x, y, color) {
+            for (let i = 0; i < 12; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6,
+                    radius: Math.random() * 3 + 2,
+                    color: color,
+                    alpha: 1.0,
+                    decay: Math.random() * 0.05 + 0.02
+                });
+            }
+        }
+
+        function spawnTarget() {
+            const myths = [
+                { text: "Upfront Uni fees", isMyth: true },
+                { text: "Submit late", isMyth: true },
+                { text: "Must use school email", isMyth: true },
+                { text: "CS has low return", isMyth: true },
+                { text: "Skip reference validation", isMyth: true }
+            ];
+            const truths = [
+                { text: "FSM Fee Waiver", isMyth: false },
+                { text: "cohort10 Buzzword", isMyth: false },
+                { text: "Tuition Loans", isMyth: false },
+                { text: "Repay only > £25k", isMyth: false }
+            ];
+
+            const pool = Math.random() > 0.4 ? myths : truths;
+            const chosen = pool[Math.floor(Math.random() * pool.length)];
+
+            targets.push({
+                x: Math.random() * (canvas.width - 100) + 50,
+                y: -20,
+                radius: 24,
+                text: chosen.text,
+                isMyth: chosen.isMyth,
+                color: chosen.isMyth ? '#ef4444' : '#f59e0b',
+                speedY: Math.random() * 0.4 + targetSpeed
+            });
+        }
+
+        function gameLoop() {
+            if (!gameActive) return;
+
+            // Clear frame
+            ctx.fillStyle = '#090d09';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw radar backdrop lines
+            ctx.strokeStyle = '#152517';
+            ctx.lineWidth = 1;
+            for (let r = 50; r < canvas.width; r += 50) {
+                ctx.beginPath();
+                ctx.arc(canvas.width/2, canvas.height, r, Math.PI, 2*Math.PI);
+                ctx.stroke();
+            }
+
+            // Spawn management
+            spawnTimer++;
+            if (spawnTimer > 110) {
+                spawnTarget();
+                spawnTimer = 0;
+            }
+
+            // Update & Draw targets
+            for (let i = targets.length - 1; i >= 0; i--) {
+                const t = targets[i];
+                t.y += t.speedY;
+
+                // Ground reach check
+                if (t.y > canvas.height - 10) {
+                    targets.splice(i, 1);
+                    if (t.isMyth) {
+                        // Let myths go by safely or damage turret? Just simple transition
+                    }
+                    continue;
+                }
+
+                // Draw target body circle
+                ctx.beginPath();
+                ctx.arc(t.x, t.y, t.radius, 0, 2*Math.PI);
+                ctx.fillStyle = t.color + "22";
+                ctx.fill();
+                ctx.strokeStyle = t.color;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Draw text inside
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 9px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText(t.text, t.x, t.y + 3);
+            }
+
+            // Update & Draw explosion particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= p.decay;
+
+                if (p.alpha <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, 2*Math.PI);
+                ctx.fillStyle = p.color;
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Draw friendly base turret at bottom center
+            ctx.fillStyle = '#344a37';
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height + 10, 35, Math.PI, 2*Math.PI);
+            ctx.fill();
+            ctx.strokeStyle = '#22c55e';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Sync visual aim status
+            document.getElementById('bar-fin').style.width = (scoreCount * 10) + "%";
+            document.getElementById('bar-fin-pct').innerText = (scoreCount * 10) + "%";
+
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        // Trigger Canvas initialization when Tab 2 is clicked
+        document.getElementById('tab-2').addEventListener('click', () => {
+            showScreen('screen-game');
+            startGameEngine();
+        });
+
+        // Skip to timeline configuration directly
+        function advanceToPhase3() {
+            stopGameEngine();
+            updateScore(200);
+            updateProgress(60);
+            showScreen('screen-timeline');
+            document.getElementById('tab-3').classList.remove('pointer-events-none');
+            
+            // Render the timeline sequence game content
+            renderTimelineSequence();
+
+            changeLsaSpeech("Sensational target run! You successfully separated the tuition loan myths from real aid. Phase 3: Synchronize our critical internal deadlines. Click the items in order to correct the sequence!");
+            updateLog("Timeline sync coordinates ready.");
+        }
+
+        // --- PHASE 3: TIMELINE SEQUENCER ---
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+        }
+
+        function renderTimelineSequence() {
+            // First shuffle elements safely
+            shuffleArray(currentTimelineOrder);
+            buildTimelineDOM();
+        }
+
+        function buildTimelineDOM() {
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = '';
+
+            currentTimelineOrder.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = "flex justify-between items-center bg-[#151c16] border border-emerald-900/60 p-3 rounded-lg hover:border-emerald-500 transition cursor-pointer";
+                
+                // Add swap action markers
+                card.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xs bg-emerald-950 border border-emerald-800 text-emerald-400 font-mono px-2 py-0.5 rounded font-bold">${index + 1}</span>
+                        <div>
+                            <p class="text-xs text-white font-semibold">${item.text}</p>
+                            <span class="text-[10px] text-stone-400 font-mono">Date Key: ${item.date}</span>
+                        </div>
+                    </div>
+                    <div class="flex space-x-1">
+                        <button onclick="swapTimelineItems(${index}, ${index - 1})" class="bg-stone-900 border border-stone-800 hover:bg-stone-800 text-[10px] text-stone-300 p-1.5 rounded ${index === 0 ? 'opacity-30 pointer-events-none' : ''}">▲ Up</button>
+                        <button onclick="swapTimelineItems(${index}, ${index + 1})" class="bg-stone-900 border border-stone-800 hover:bg-stone-800 text-[10px] text-stone-300 p-1.5 rounded ${index === currentTimelineOrder.length - 1 ? 'opacity-30 pointer-events-none' : ''}">▼ Down</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function swapTimelineItems(idx1, idx2) {
+            if (idx2 < 0 || idx2 >= currentTimelineOrder.length) return;
+            const temp = currentTimelineOrder[idx1];
+            currentTimelineOrder[idx1] = currentTimelineOrder[idx2];
+            currentTimelineOrder[idx2] = temp;
+            
+            playSynthSound(500, 'triangle', 0.1, 0.05);
+            buildTimelineDOM();
+        }
+
+        function resetTimeline() {
+            currentTimelineOrder = [...originalTimelineData];
+            renderTimelineSequence();
+        }
+
+        function verifyTimeline() {
+            // Check if matches the chronological progression
+            let correct = true;
+            for (let i = 0; i < currentTimelineOrder.length; i++) {
+                if (currentTimelineOrder[i].id !== originalTimelineData[i].id) {
+                    correct = false;
+                    break;
+                }
+            }
+
+            if (correct) {
+                updateScore(250);
+                updateProgress(80);
+                showScreen('screen-platoon');
+                document.getElementById('tab-4').classList.remove('pointer-events-none');
+                
+                // Sync status upgrade bars
+                document.getElementById('bar-dead').style.width = "100%";
+                document.getElementById('bar-dead-pct').innerText = "100%";
+
+                changeLsaSpeech("Incredible timeline sync, Commander! You prioritized critical dates correctly: Internal draft reviews come first on September 1st, then external submissions. Let's configure your University Platoon next.");
+                updateLog("Chronology verified. Deploying choice system.");
+                playSuccessSound();
+            } else {
+                changeLsaSpeech("Warning! Time distortion detected. Draft deadlines must precede final submissions. Ensure draft Personal Statements are first, followed by submission dates.");
+                playFailSound();
+            }
+        }
+
+        // --- PHASE 4: PLATOON HUB (UNIVERSITY CHOICES) ---
+        function selectUniversityCandidate(uniDetails) {
+            // Find first empty slot and drop it in
+            let emptyIdx = universitySlots.indexOf(null);
+            if (emptyIdx !== -1) {
+                universitySlots[emptyIdx] = uniDetails;
+                playSynthSound(600, 'triangle', 0.15, 0.05);
+                updatePlatoonDOM();
+            } else {
+                changeLsaSpeech("Warning: Maximum of 5 active application choices are allowed on the tactical map screen. Clear a choice before replacing it.");
+                playFailSound();
+            }
+        }
+
+        function clearSlot(index) {
+            if (universitySlots[index] !== null) {
+                universitySlots[index] = null;
+                playSynthSound(300, 'sawtooth', 0.1, 0.05);
+                updatePlatoonDOM();
+            }
+        }
+
+        function updatePlatoonDOM() {
+            let selectedCount = 0;
+            universitySlots.forEach((slot, index) => {
+                const el = document.getElementById(`slot-${index}`);
+                if (slot) {
+                    el.innerText = "✓ " + slot;
+                    el.className = "text-white font-bold font-mono tracking-tight";
+                    selectedCount++;
+                } else {
+                    el.innerText = "Slot empty - Click candidate below";
+                    el.className = "text-stone-400 font-mono italic";
+                }
+            });
+
+            // Update Platoon balancer bar
+            let barPct = Math.round((selectedCount / 5) * 100);
+            document.getElementById('bar-uni').style.width = barPct + "%";
+            document.getElementById('bar-uni-pct').innerText = barPct + "%";
+        }
+
+        function launchPlatoon() {
+            // Verify all 5 slots are full
+            if (universitySlots.includes(null)) {
+                changeLsaSpeech("Your tactical spread is incomplete. Deploy all 5 slots with Safes, Solids, and Aspirationals for optimum coverage.");
+                playFailSound();
+                return;
+            }
+
+            // Finalizing campaign successfully
+            updateScore(350);
+            updateProgress(100);
+            showScreen('screen-victory');
+            playSuccessSound();
+
+            changeLsaSpeech("VICTORY! All 5 Choices synced. Ready for review. Our Ada staff reference module is now attached. You are fully prepared to navigate the high-earning digital industry.");
+            updateLog("Operation Complete: Vanguard deployed.");
+        }
+
+        // --- PHASE 5: CERTIFICATE AND IPP PRINT ---
+        function printIPPCertificate() {
+            window.print();
+        }
+
+        function resetWholeCampaign() {
+            score = 0;
+            progress = 5;
+            userRegOptions = { email: '', year: '', school: '', buzzwordVerified: false };
+            universitySlots = [null, null, null, null, null];
+            
+            document.getElementById('bar-reg').style.width = "0%";
+            document.getElementById('bar-reg-pct').innerText = "0%";
+            document.getElementById('bar-dead').style.width = "0%";
+            document.getElementById('bar-dead-pct').innerText = "0%";
+            document.getElementById('bar-fin').style.width = "0%";
+            document.getElementById('bar-fin-pct').innerText = "0%";
+            document.getElementById('bar-uni').style.width = "0%";
+            document.getElementById('bar-uni-pct').innerText = "0%";
+
+            updateScore(0);
+            updateProgress(5);
+            
+            // Reset tank visualization
+            document.getElementById('tank-barrel').style.color = '#78716c';
+            document.getElementById('tank-barrel').setAttribute('stroke-width', '4');
+            document.getElementById('tank-hull').style.color = '#78716c';
+            document.getElementById('tank-hull').setAttribute('fill-opacity', '0.2');
+            document.getElementById('weapon-badge').innerText = "Aim: Offline";
+            document.getElementById('weapon-badge').className = "absolute top-2 right-2 text-[10px] px-1.5 py-0.5 rounded bg-stone-900 border border-stone-800 font-mono text-stone-400";
+            document.getElementById('chassis-badge').innerText = "Hull: Standard";
+            document.getElementById('chassis-badge').className = "absolute bottom-2 left-2 text-[10px] px-1.5 py-0.5 rounded bg-stone-900 border border-stone-800 font-mono text-stone-400";
+
+            showScreen('screen-briefing');
+            changeLsaSpeech("Ready to try again? Let's refresh our training to lock in those high-earning tech milestones!");
+        }
+    </script>
+</body>
+</html>
