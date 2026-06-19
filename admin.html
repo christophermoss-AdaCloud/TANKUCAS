@@ -82,7 +82,7 @@
     <!-- Main Tactical Workspace -->
     <main class="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 p-4">
         
-        <!-- LEFT COLUMN: LSA Advisor Panel & Tank Inventory (Adaptive & highly readable) -->
+        <!-- LEFT COLUMN: LSA Advisor Panel & Tank Inventory -->
         <section class="lg:col-span-4 bg-[#172018] rounded-xl border border-[#2e3e31] p-4 flex flex-col justify-between shadow-2xl relative">
             
             <!-- Commander Avatar & Speech Box -->
@@ -151,7 +151,7 @@
                         <span id="weapon-badge" class="absolute top-2 right-2 text-[10px] px-1.5 py-0.5 rounded bg-stone-900 border border-stone-800 font-mono text-stone-400">Aim: Offline</span>
                     </div>
 
-                    <!-- Modular Upgrade bars (linked directly to the student's UCAS progress!) -->
+                    <!-- Modular Upgrade bars -->
                     <div class="space-y-2">
                         <div>
                             <div class="flex justify-between text-[11px] text-stone-400">
@@ -340,17 +340,17 @@
                     </div>
 
                     <p class="text-xs text-stone-300 leading-tight">
-                        <strong>Controls:</strong> Click or tap to aim and shoot at target balloons! Blast away harmful myths (Red) while collecting helpful truths (Green/Gold). Avoid shooting truths!
+                        <strong>Controls:</strong> Click, tap or drag on the radar scanner area to fire high-energy beams at targets. Destroy mythical Red hurdles while shielding yellow Truth modules!
                     </p>
 
                     <!-- Interactive Canvas Area -->
                     <div class="relative bg-black rounded-lg border border-emerald-950 overflow-hidden" style="height: 240px;">
-                        <canvas id="game-canvas" class="block w-full h-full"></canvas>
+                        <canvas id="game-canvas" class="block w-full h-full cursor-crosshair"></canvas>
                         
                         <!-- Overlay Hud -->
-                        <div class="absolute top-2 left-2 bg-[#121813]/80 p-2 rounded text-xs border border-emerald-900 flex space-x-4">
-                            <div>Ammo: <span id="game-ammo" class="text-emerald-400 font-bold">Unlimited</span></div>
-                            <div>Score: <span id="game-hits" class="text-amber-400 font-bold">0</span></div>
+                        <div class="absolute top-2 left-2 bg-[#121813]/85 p-2 rounded text-[11px] border border-emerald-900 flex space-x-4">
+                            <div>Scanner Status: <span class="text-emerald-400 font-bold font-mono">ONLINE</span></div>
+                            <div>Barriers Cleared: <span id="game-hits" class="text-amber-400 font-bold font-mono">0/10</span></div>
                         </div>
 
                         <!-- Completion check popup -->
@@ -394,7 +394,7 @@
                     </div>
                 </div>
 
-                <!-- PHASE 4: Platoon Balancer (Choose Universities) -->
+                <!-- PHASE 4: Platoon Balancer -->
                 <div id="screen-platoon" class="space-y-4 hidden">
                     <div class="flex justify-between items-center border-b border-[#253828] pb-2 mb-3">
                         <h3 class="text-lg font-bold text-emerald-400 retro-font">Launch Hub: Balance Your Platoon</h3>
@@ -587,7 +587,7 @@
                 osc.start();
                 osc.stop(ctx.currentTime + duration);
             } catch (e) {
-                console.log("Audio not allowed yet by user interaction context.");
+                console.log("Audio contexts wait for direct user interaction before playback.");
             }
         }
 
@@ -637,6 +637,7 @@
         // Track platoon slots
         let universitySlots = [null, null, null, null, null];
 
+        // --- STREAMING_CHUNK: Writing Speech synthesizers and core log utilities... ---
         // --- SPEECH SYSTEM (Text-to-Speech Accessibility for SEND students) ---
         function speakCurrentInstruction() {
             const speechText = document.getElementById('lsa-speech').innerText;
@@ -648,7 +649,7 @@
                 utterance.pitch = 1.1; // Gentle, friendly high-pitched tone
                 window.speechSynthesis.speak(utterance);
             } else {
-                alert("Text-to-Speech is not supported natively in this browser version.");
+                console.log("Speech synthesis is unavailable or muted.");
             }
         }
 
@@ -680,6 +681,7 @@
             document.getElementById('tactical-log').innerText = "Log: " + message;
         }
 
+        // --- STREAMING_CHUNK: Writing Phase navigation router and tab highlights... ---
         // --- SCREEN ROUTING MODULES ---
         function showScreen(screenId) {
             const screens = ['screen-briefing', 'screen-register', 'screen-game', 'screen-timeline', 'screen-platoon', 'screen-victory'];
@@ -734,6 +736,7 @@
             updateLog("Objective: Setup Registration Hub parameters.");
         }
 
+        // --- STREAMING_CHUNK: Managing registration option inputs... ---
         // --- PHASE 1: REGISTRATION ---
         function selectOption(category, value, element) {
             userRegOptions[category] = value;
@@ -783,12 +786,12 @@
 
         function submitRegistrationPhase() {
             if (userRegOptions.email !== 'personal') {
-                changeLsaSpeech("Warning! Registering with a school email instead of a personal email risk losing future access once you graduate high school. Please choose Personal Email!");
+                changeLsaSpeech("Warning! Registering with a school email instead of a personal email risks losing future access once you graduate school. Please choose Personal Email!");
                 playFailSound();
                 return;
             }
             if (userRegOptions.year !== '2027') {
-                changeLsaSpeech("Check start year! Applications made now are for the 2027 entry cycle, including deferred. Make sure 2027 is selected!");
+                changeLsaSpeech("Check start year! Applications made now are for the 2027 entry cycle. Make sure 2027 is selected!");
                 playFailSound();
                 return;
             }
@@ -801,8 +804,10 @@
             // Success configuration
             updateScore(150);
             updateProgress(40);
-            showScreen('screen-game');
+            
+            // Un-hide game panel and start the game engine!
             document.getElementById('tab-2').classList.remove('pointer-events-none');
+            startGameEngine();
             
             // Upgrade visual tank turret gun
             document.getElementById('tank-barrel').style.color = '#10b981';
@@ -814,27 +819,28 @@
             updateLog("Aim module online. Ready for Skirmish 2.");
         }
 
+        // --- STREAMING_CHUNK: Architecting the Turret Run canvas engine... ---
         // --- PHASE 2: CANV_ARCADE TARGET RUN GAME ---
         let canvas, ctx;
         let gameLoopId;
-        let ammoCount = 999;
         let scoreCount = 0;
         let targets = [];
         let particles = [];
+        let activeLasers = [];
         let targetSpeed = 1.0;
         let spawnTimer = 0;
-        let turretAngle = 0;
         let gameActive = false;
 
         function initGameEngine() {
             canvas = document.getElementById('game-canvas');
+            if (!canvas) return;
             ctx = canvas.getContext('2d');
             
-            // Adjust canvas to container sizing cleanly
+            // Adjust canvas to container sizing cleanly on window load
             resizeGameCanvas();
             window.addEventListener('resize', resizeGameCanvas);
 
-            // Custom click shooter trigger
+            // Laser shooter tracking click/tap
             canvas.addEventListener('mousedown', function(e) {
                 if (!gameActive) return;
                 const rect = canvas.getBoundingClientRect();
@@ -855,17 +861,24 @@
 
         function resizeGameCanvas() {
             if (canvas) {
-                canvas.width = canvas.parentElement.clientWidth;
+                // Fetch dynamic layout width to avoid scale compression issues on static pages
+                const parentWidth = canvas.parentElement ? canvas.parentElement.clientWidth : 0;
+                canvas.width = parentWidth > 0 ? parentWidth : 600;
                 canvas.height = 240;
             }
         }
 
         function startGameEngine() {
+            // First display the viewport so clientWidth computes accurately (not 0)
+            showScreen('screen-game');
+            resizeGameCanvas();
+
             gameActive = true;
             scoreCount = 0;
             targets = [];
             particles = [];
-            targetSpeed = 0.8;
+            activeLasers = [];
+            targetSpeed = 1.0;
             spawnTimer = 0;
             updateGameScoreDisplay();
             
@@ -888,18 +901,21 @@
 
         function updateGameScoreDisplay() {
             document.getElementById('game-hits').innerText = scoreCount + "/10";
+            document.getElementById('bar-fin').style.width = (scoreCount * 10) + "%";
+            document.getElementById('bar-fin-pct').innerText = (scoreCount * 10) + "%";
         }
 
         function fireTurretAt(targetX, targetY) {
             playLaserSound();
             
-            // Draw a quick temporary beam
-            ctx.beginPath();
-            ctx.strokeStyle = '#22c55e';
-            ctx.lineWidth = 3;
-            ctx.moveTo(canvas.width / 2, canvas.height - 15);
-            ctx.lineTo(targetX, targetY);
-            ctx.stroke();
+            // Add visual laser configuration with life frames
+            activeLasers.push({
+                startX: canvas.width / 2,
+                startY: canvas.height - 15,
+                endX: targetX,
+                endY: targetY,
+                life: 8 // frame lifespans
+            });
 
             // Check hit collisions
             for (let i = targets.length - 1; i >= 0; i--) {
@@ -915,6 +931,7 @@
             }
         }
 
+        // --- STREAMING_CHUNK: Managing collisions and particle updates... ---
         function handleTargetHit(target, index) {
             targets.splice(index, 1);
             createHitParticles(target.x, target.y, target.color);
@@ -927,7 +944,7 @@
             } else {
                 scoreCount = Math.max(0, scoreCount - 1);
                 updateGameScoreDisplay();
-                updateLog("COLLATERAL DAMAGE! Truth destroyed: " + target.text);
+                updateLog("SHIELD DAMAGED! Truth hit: " + target.text);
             }
 
             if (scoreCount >= 10) {
@@ -953,8 +970,9 @@
         }
 
         function spawnTarget() {
+            if (!gameActive) return;
             const myths = [
-                { text: "Upfront Uni fees", isMyth: true },
+                { text: "Upfront fees", isMyth: true },
                 { text: "Submit late", isMyth: true },
                 { text: "Must use school email", isMyth: true },
                 { text: "CS has low return", isMyth: true },
@@ -973,7 +991,7 @@
             targets.push({
                 x: Math.random() * (canvas.width - 100) + 50,
                 y: -20,
-                radius: 24,
+                radius: 22,
                 text: chosen.text,
                 isMyth: chosen.isMyth,
                 color: chosen.isMyth ? '#ef4444' : '#f59e0b',
@@ -981,6 +999,7 @@
             });
         }
 
+        // --- STREAMING_CHUNK: Running game loop and drawing visuals... ---
         function gameLoop() {
             if (!gameActive) return;
 
@@ -988,7 +1007,7 @@
             ctx.fillStyle = '#090d09';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Draw radar backdrop lines
+            // Draw radar backdrop line patterns
             ctx.strokeStyle = '#152517';
             ctx.lineWidth = 1;
             for (let r = 50; r < canvas.width; r += 50) {
@@ -997,9 +1016,9 @@
                 ctx.stroke();
             }
 
-            // Spawn management
+            // Target spawn pacing
             spawnTimer++;
-            if (spawnTimer > 110) {
+            if (spawnTimer > 100) {
                 spawnTarget();
                 spawnTimer = 0;
             }
@@ -1009,16 +1028,13 @@
                 const t = targets[i];
                 t.y += t.speedY;
 
-                // Ground reach check
+                // Ground boundary logic
                 if (t.y > canvas.height - 10) {
                     targets.splice(i, 1);
-                    if (t.isMyth) {
-                        // Let myths go by safely or damage turret? Just simple transition
-                    }
                     continue;
                 }
 
-                // Draw target body circle
+                // Inner circle fill and bounds
                 ctx.beginPath();
                 ctx.arc(t.x, t.y, t.radius, 0, 2*Math.PI);
                 ctx.fillStyle = t.color + "22";
@@ -1027,14 +1043,30 @@
                 ctx.lineWidth = 2;
                 ctx.stroke();
 
-                // Draw text inside
+                // Clear labels text layout
                 ctx.fillStyle = '#ffffff';
                 ctx.font = 'bold 9px Inter';
                 ctx.textAlign = 'center';
                 ctx.fillText(t.text, t.x, t.y + 3);
             }
 
-            // Update & Draw explosion particles
+            // Render laser beam lines with decaying frame alpha
+            for (let i = activeLasers.length - 1; i >= 0; i--) {
+                const l = activeLasers[i];
+                ctx.beginPath();
+                ctx.strokeStyle = `rgba(34, 197, 94, ${l.life / 8})`;
+                ctx.lineWidth = 3;
+                ctx.moveTo(l.startX, l.startY);
+                ctx.lineTo(l.endX, l.endY);
+                ctx.stroke();
+                
+                l.life--;
+                if (l.life <= 0) {
+                    activeLasers.splice(i, 1);
+                }
+            }
+
+            // Render particles
             for (let i = particles.length - 1; i >= 0; i--) {
                 const p = particles[i];
                 p.x += p.vx;
@@ -1055,7 +1087,7 @@
                 ctx.restore();
             }
 
-            // Draw friendly base turret at bottom center
+            // Draw friendly defense base gun turret at the bottom-center
             ctx.fillStyle = '#344a37';
             ctx.beginPath();
             ctx.arc(canvas.width / 2, canvas.height + 10, 35, Math.PI, 2*Math.PI);
@@ -1064,16 +1096,11 @@
             ctx.lineWidth = 3;
             ctx.stroke();
 
-            // Sync visual aim status
-            document.getElementById('bar-fin').style.width = (scoreCount * 10) + "%";
-            document.getElementById('bar-fin-pct').innerText = (scoreCount * 10) + "%";
-
             gameLoopId = requestAnimationFrame(gameLoop);
         }
 
         // Trigger Canvas initialization when Tab 2 is clicked
         document.getElementById('tab-2').addEventListener('click', () => {
-            showScreen('screen-game');
             startGameEngine();
         });
 
@@ -1088,10 +1115,11 @@
             // Render the timeline sequence game content
             renderTimelineSequence();
 
-            changeLsaSpeech("Sensational target run! You successfully separated the tuition loan myths from real aid. Phase 3: Synchronize our critical internal deadlines. Click the items in order to correct the sequence!");
+            changeLsaSpeech("Sensational target run! You successfully separated the tuition loan myths from real aid. Phase 4: Synchronize our critical internal deadlines. Click the items in order to correct the sequence!");
             updateLog("Timeline sync coordinates ready.");
         }
 
+        // --- STREAMING_CHUNK: Structuring Phase 3: Timeline sorting sequence... ---
         // --- PHASE 3: TIMELINE SEQUENCER ---
         function shuffleArray(arr) {
             for (let i = arr.length - 1; i > 0; i--) {
@@ -1176,6 +1204,7 @@
             }
         }
 
+        // --- STREAMING_CHUNK: Writing university selection platoon mechanics... ---
         // --- PHASE 4: PLATOON HUB (UNIVERSITY CHOICES) ---
         function selectUniversityCandidate(uniDetails) {
             // Find first empty slot and drop it in
